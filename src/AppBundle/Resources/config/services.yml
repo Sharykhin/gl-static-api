@@ -1,0 +1,13 @@
+services:
+
+    AppBundle\Contract\Upload\UploadFileInterface:
+        autowire: true
+        class: AppBundle\Service\Upload\LocalFileUpload
+
+    AppBundle\Contract\Upload\ManageFileUploadInterface:
+        autowire: true
+        class: AppBundle\Service\Upload\LocalFileUpload
+
+    AppBundle\Contract\Upload\DownloadFileInterface:
+        autowire: true
+        class: AppBundle\Service\Upload\LocalFileUpload

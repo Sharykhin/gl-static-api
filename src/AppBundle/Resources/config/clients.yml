@@ -1,0 +1,4 @@
+parameters:
+  clients:
+    - { bucket: barchart, access_key: 00e316f064eedb0769c2857e8dfb28d7, secret_key: f14e28ff39e138169d477b9dd2f06df6_secret }
+    - { bucket: rideshare, access_key: 00e316f064eedb0769c2857e8dfb28d6, secret_key: f14e28ff39e138169d477b9dd2f06df7_secret }

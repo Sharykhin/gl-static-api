@@ -1,0 +1,16 @@
+services:
+    kernel.listener.app_exception_listener:
+        class: AppBundle\EventListener\AppExceptionListener
+        arguments: ['@service_container']
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+
+    AppBundle\EventListener\File\FileUploadListener:
+        autowire: true
+        tags:
+          - { name: kernel.event_listener, event: file.uploaded, method: onFileUploaded }
+
+    AppBundle\EventListener\AppControllerListener:
+        autowire: true
+        tags:
+          - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }

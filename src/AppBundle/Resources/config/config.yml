@@ -1,0 +1,5 @@
+imports:
+    - { resource: services.yml }
+    - { resource: listeners.yml }
+    - { resource: parameters.yml }
+    - { resource: clients.yml }
