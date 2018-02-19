@@ -1,72 +1,212 @@
-Symfony Standard Edition
-========================
+# Give me a lift project
 
-Welcome to the Symfony Standard Edition - a fully-functional Symfony
-application that you can use as the skeleton for your new applications.
+### Technology stack are:
+ 
+This application is based on micro-service architecture.
 
-For details on how to download and get started with Symfony, see the
-[Installation][1] chapter of the Symfony Documentation.
+Auth Service:
+------------
+#### frontend:
+   - [angular](https://angular.io/docs) 4.4.6
+    
+#### backend:
+   - [PHP 7.1](http://php.net/manual/en/)
+   - [laravel  5.5.0](https://laravel.com/docs/5.5)
+   - [MariaDB](https://mariadb.com/kb/en/)
+   - [nginx](https://nginx.org/ru/docs/)
 
-What's inside?
+Static Service:
 --------------
 
-The Symfony Standard Edition is configured with the following defaults:
+#### backend:
+   - [PHP 7.1](http://php.net/manual/en/)
+   - [Symfony 3.3](https://symfony.com/doc/3.3/setup.html)
+   
+Mail Service:
+-------------
 
-  * An AppBundle you can use to start coding;
+#### backend:
+   - [Golang](https://golang.org/)
+   
+   
+-----------
 
-  * Twig as the only configured template engine;
+#### environment:
+   - [docker containers](https://docs.docker.com/)
+   
+### Documentation
 
-  * Doctrine ORM/DBAL;
+##### [Mail Service](./docs/mail/mails.md)
+##### [Mail Service: API](./docs/mail/api.md)
+##### [Static Service: API](./docs/static/readme.md)
+##### [Auth Service :API](./docs/api/api.md)
 
-  * Swiftmailer;
+### Get Started
 
-  * Annotations enabled for everything.
+Run all containers by using one docker command. It will run all the containers and
+install test data. Currently only *dev* environment is supported well.
 
-It comes pre-configured with the following bundles:
+```bash
+docker-compose up
+```
 
-  * **FrameworkBundle** - The core Symfony framework bundle
+##### Running mail service:
+Mail service is based on [golang](https://golang.org/) 
+and supports two environments: *dev* and *production*
+By default this service will be run in *dev* mode and hot-module 
+replacement will come to play:
 
-  * [**SensioFrameworkExtraBundle**][6] - Adds several enhancements, including
-    template and routing annotation capability
+```bash
+docker-compose up mail-golang
+docker-compose up mail-mysql
+```
 
-  * [**DoctrineBundle**][7] - Adds support for the Doctrine ORM
+After running `mail-mysql` container first time you need to install test data:
 
-  * [**TwigBundle**][8] - Adds support for the Twig templating engine
+```bash
+docker-compose exec mail-mysql sh /tmp/post-run.sh
+```
 
-  * [**SecurityBundle**][9] - Adds security by integrating Symfony's security
-    component
+This command will create test *database* and *credentials* table in it.
+Test credentials are: 
+```json
+{
+	"api_key": "key1234",
+	"secret_key":"secret1234"
+}
+```
 
-  * [**SwiftmailerBundle**][10] - Adds support for Swiftmailer, a library for
-    sending emails
+To run it in production mode use `APP_ENV` variable: (**this may not work**)
 
-  * [**MonologBundle**][11] - Adds support for Monolog, a logging library
+```bash
+APP_ENV=production docker-compose up mail-golang
+```
 
-  * **WebProfilerBundle** (in dev/test env) - Adds profiling functionality and
-    the web debug toolbar
+This service links `mail-queue` service that provides queue for receiving messages.
+The `mail-queue` service is described below.
 
-  * **SensioDistributionBundle** (in dev/test env) - Adds functionality for
-    configuring and working with Symfony distributions
+Mail service receives the following JSON string format:
+```json
+{
+  "action": "register",
+  "payload": {}
+}
+```
 
-  * [**SensioGeneratorBundle**][13] (in dev env) - Adds code generation
-    capabilities
+The format is pretty simple and self-documented. 
+`action` property provides information what kind of mail should be sent, 
+for example: *register*, *startRoute*, *resetPassword*.  
+Keep in mind that **camelCase** is in use
 
-  * [**WebServerBundle**][14] (in dev env) - Adds commands for running applications
-    using the PHP built-in web server
+Example:
+```json
+{
+  "action": "register",
+  "payload": {
+    "to" : "john@test.com",
+    "name": "John",
+    "activationLinkHash": "SomeHash"
+  }
+}
+```
 
-  * **DebugBundle** (in dev/test env) - Adds Debug and VarDumper component
-    integration
+Currently [Mailgun](https://app.mailgun.com/app/dashboard) is in use 
+for sending mails.
+Use the following credentials: *siarhei.sharykhin@gmail.com/Tt2439868*  
 
-All libraries and bundles included in the Symfony Standard Edition are
-released under the MIT or BSD license.
+All the failed messages(some issue on third-party service or anything else) 
+will be logged in into a file and a cron job will try to send them again.
+Cron job is run every 5 minutes.
 
-Enjoy!
+If you have any questions don't hesitate to contact the author:  
+Siarhei Sharykhin <siarhei.sharykhin@gmail.com>
 
-[1]:  https://symfony.com/doc/3.3/setup.html
-[6]:  https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html
-[7]:  https://symfony.com/doc/3.3/doctrine.html
-[8]:  https://symfony.com/doc/3.3/templating.html
-[9]:  https://symfony.com/doc/3.3/security.html
-[10]: https://symfony.com/doc/3.3/email.html
-[11]: https://symfony.com/doc/3.3/logging.html
-[13]: https://symfony.com/doc/current/bundles/SensioGeneratorBundle/index.html
-[14]: https://symfony.com/doc/current/setup/built_in_web_server.html
+#### Running mail queue service:
+General mail service is used a queue it's [rabbitmq](https://www.rabbitmq.com)
+for receiving messages use the following command to run the queue:
+
+```bash
+docker-compose up mail-queue
+```
+
+After that you manage your queue through web interface: [localhost:15672](http://localhost:15672/)
+use *guest*/*guest* credentials.  
+By default service exposes two ports: *15672* (for ui management) and *5672*.  
+Feel free to contact an author: Siarhei Sharykhin <siarhei.sharykhin@gmail.com>  
+
+#### Testing queue messages
+Open [localhost:15672](http://localhost:15672/) with *guest/guest* credentials.  
+Then go to [localhost:15672/#/queues/%2F/mail](http://localhost:15672/#/queues/%2F/mail)  
+At the bottom there is Publish message option, open it:
+Use the following message:
+
+```json
+{"action":"register", "payload":{"to":"siarhei.sharykhin@itechart-group.com", "name":"John"}}
+```
+
+or 
+```json
+{"action":"register", "payload":{"to":"artsem.vasilevich@itechart-group.com", "name":"John"}}
+```
+
+We use authorized recipients on mailgun, that's why we may have limited number of recipients.
+
+#### Testing failed message:
+To test failed message run a container with `APP_ENV=TEST_FAIL`
+```bash
+APP_MAIL=TEST_FAIL docker-compose up mail-golang
+```
+
+Then send a couple of messages by using rabbitmq management UI(see above)
+
+Then open container terminal:
+```bash
+docker exec -i -t mail_service_golang /bin/bash
+```
+Go to restore-cron command file:
+```bash
+cd /go/src/mail/cmd/restore-cron
+```
+Run it with different `APP_ENV` value:
+```bash
+APP_ENV=dev go run main.go
+```
+
+#### Static File Upload
+This service is responsible for uploading different images
+and static files
+
+
+Run docker services:
+```bash
+docker-compose up static-php
+docker-compose up static-nginx
+```
+
+Install vendors:
+```bash
+docker-compose exec static-php bash
+cd /app
+composer install
+```
+
+Running test:
+```bash
+docker-compose exec static-php bash
+cd /app
+./vendor/bin/phpunit
+```
+As tests are run the code coverage statistic 
+will be available under [localhost:8002/codeCoverage/index.html](http://localhost:8002/codeCoverage/index.html)
+
+For testing JWT (**just for beta tests** since some time late we will use auth service)
+you need to generate private public keys:
+ 
+```bash
+docker-compose exec static-php bash
+cd /app/app/var
+openssl genrsa -out private.pem 1024
+openssl rsa -in private.pem -out public.pem -pubout
+```
+
+[Read documentation](docs/static/readme.md)
