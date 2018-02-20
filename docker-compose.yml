@@ -1,127 +1,27 @@
 version: "2.1"
 
 services:
-  auth-php:
-    container_name: auth_service_php
-    image: auth_service/php
-    build: .docker/auth/php
-    env_file:
-      - .docker/auth/php/.env
+  gl-static-api-php:
+    container_name: gl-static-api-php
+    build: .docker/php/${APP_ENV:-dev}
     volumes:
-      - ./services/auth:/var/www/auth
-    links:
-      - auth-mariadb
-      - mail-queue
-    depends_on:
-      - auth-mariadb
-
-  auth-mariadb:
-    container_name: auth_service_mariadb
-    image: auth_service/Do
-    build:
-      context: .
-      dockerfile: .docker/auth/mariadb/Dockerfile
-    volumes:
-      - ./.docker-runtime/:/bitnami
-    ports:
-      - "3307:3306"
-    env_file:
-      - .docker/auth/mariadb/.env
-  auth-nginx:
-    container_name: auth_service_nginx
-    image: auth_service/nginx
-    build:
-      context: .
-      dockerfile: .docker/auth/nginx/Dockerfile
-    volumes:
-      - ./services/auth:/var/www/auth
-    links:
-      - auth-php
-    ports:
-      - "80:80"
-      - "443:443"
-  mail-mysql:
-      container_name: mail_service_mysql
-      build: .docker/mail/mysql/
-      ports:
-        - "3308:3306"
-      volumes:
-        - ./.docker-runtime/mysql/:/var/lib/mysql
-      env_file:
-        - .docker/mail/mysql/.env
-  mail-manager:
-    container_name: mail_manager_service
-    image: mail_service_golang
-    volumes:
-        - ./services/mail-manager:/go/src/github.com/Sharykhin/gl-mail-manager
-    links:
-      - mail-queue
-      #- mail-mysql
-    environment:
-      - AMPQ_ADDRESS=amqp://mail-queue:5672
-      #- MYSQL_DNS=root:root@tcp(mail-mysql:3306)/test?charset=utf8
-    build:
-      args:
-        app_env: ${APP_ENV:-dev}
-        app_mail: ${APP_MAIL:-OK}
-      context: ./services/mail-manager
-      dockerfile: Dockerfile
-    env_file:
-      - ./services/mail-manager/.env
-    depends_on:
-      #mail-mysql:
-      #  condition: service_started
-      mail-queue:
-        condition: service_healthy
-    restart: on-failure
-  mail-api:
-    container_name: mail_api_manager
-    volumes:
-        - ./services/mail-api:/go/src/github.com/Sharykhin/gl-mail-api
-    build:
-      args:
-        app_env: ${APP_ENV:-dev}
-      context: ./services/mail-api
-      dockerfile: Dockerfile
-    ports:
-      - "8082:8082"
-  mail-queue:
-    image: auth_service/mail-queue
-    build:
-      context: .
-      dockerfile: .docker/mail/queue/Dockerfile
-    container_name: mail_service_queue
-    ports:
-      - 5672:5672
-      - 15672:15672
-    env_file:
-      - .docker/mail/queue/.env
-    healthcheck:
-      test:   ["CMD", "curl", "-f", "127.0.0.1:15672"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-  static-php:
-    container_name: static_service_php
-    build: .docker/static/php/${APP_ENV:-dev}
-    volumes:
-      - ./services/static:/app
+      - .:/app
     command: sh /srv/scripts/post-run.sh
-  static-nginx:
-    container_name: static_service_nginx
-    build: .docker/static/nginx
+  gl-static-api-nginx:
+    container_name: gl-static-api-nginx
+    build: .docker/nginx
     volumes_from:
-      - static-php
+      - gl-static-api-php
     ports:
       - "8003:80"
-  static-varnish:
-    container_name: static_service_varnish
-    build: .docker/static/varnish
+  gl-static-api-varnish:
+    container_name: gl-static-api-varnish
+    build: .docker/varnish
     ports:
-      - "8002:80"
+      - "8004:80"
     depends_on:
-      - static-nginx
+      - gl-static-api-nginx
     links:
-      - static-nginx
+      - gl-static-api-nginx
 
 

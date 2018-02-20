@@ -1,5 +1,5 @@
 backend default {
-  .host = "static-nginx";
+  .host = "gl-static-api-nginx";
   .port = "80";
 }
 

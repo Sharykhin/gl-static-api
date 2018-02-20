@@ -31,12 +31,6 @@ RUN docker-php-ext-enable imagick
 #RUN ln -s /usr/share/zoneinfo/Asia/Dubai /etc/localtime
 #RUN "date"
 
-# Install memcached extension
-#RUN git clone https://github.com/php-memcached-dev/php-memcached /usr/src/php/ext/memcached \
-#    && cd /usr/src/php/ext/memcached && git checkout -b php7 origin/php7 \
-#    && docker-php-ext-configure memcached \
-#    && docker-php-ext-install memcached
-
 # Run docker-php-ext-install for available extensions
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install pdo pdo_mysql intl
