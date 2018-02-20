@@ -65,9 +65,13 @@ Params:
 
 Example:
 ```bash
-GET http://localhost:8002/images/barchart/origin/b1da6814f527de5cd420cb6cbc1aa98e.jpeg
-GET http://localhost:8002/images/barchart/w_200,h_200/b1da6814f527de5cd420cb6cbc1aa98e.jpeg
+GET http://localhost:8004/images/barchart/origin/b1da6814f527de5cd420cb6cbc1aa98e.jpeg
+GET http://localhost:8004/images/barchart/w_200,h_200/b1da6814f527de5cd420cb6cbc1aa98e.jpeg
 ```
+
+Take into account that **Varnish** is in play and by default all GET requests will be cached
+for a minute.
+
 
 #### Authorization:
 
