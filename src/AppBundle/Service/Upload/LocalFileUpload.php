@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 class LocalFileUpload implements ManageFileUploadInterface
 {
+//    TODO: don't you think it's better to use some kind of method that returns root directory?
     const UPLOAD_DIR = __DIR__ . '/../../../../web/uploads';
 
     /** @var ContainerInterface $container */
