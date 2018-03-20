@@ -78,7 +78,6 @@ for a minute.
 Once you registered you should get access key and secret key with bucket name.
 For authorization services uses *Authorization* header and supports two way of authorization:
 - by using HMAC-SHA1, which is an algorithm defined by [RFC 2104 - Keyed-Hashing for Message Authentication](http://www.ietf.org/rfc/rfc2104.txt).
-- by using [bcrypt](https://en.wikipedia.org/wiki/Bcrypt) hashing.
 
 HMAC-SHA1:
 ```
@@ -89,12 +88,6 @@ Signature = Base64(HMAC-SHA1(SecretKey, BucketName));
 The final result may look like this:
 ```
 Authorization: GL 00e316f064eedb0769c2857e8dfb28d6:aGGkcilBfrAiXTSKqELx6unc23Y= 
-```
-
-Bcrypt:
-```
-Authorization = "GLBC" + " " + AccessKey + ":" + Signature;
-Signature = BCRYPT("AccessKey:BucketName");
 ```
 
 The final result may look like this:

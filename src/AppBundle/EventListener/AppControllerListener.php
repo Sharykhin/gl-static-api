@@ -62,22 +62,7 @@ class AppControllerListener
             $token = trim($event->getRequest()->headers->get('Authorization'));
             $clients = $this->container->getParameter('clients');
 
-            // TODO: using password hash for general token I guess is overcomplicated and we can get rid of it at all
-            if (strpos($token, 'GLBC ') === 0) {
-                list($accessKey, $hash) = explode(':', trim(str_replace('GLBC', '', $token)));
-
-                $index = array_search($accessKey, array_column($clients, 'access_key'));
-                if ($index === false || !isset($clients[$index])) {
-                    goto exc;
-                }
-                $client = $clients[$index];
-                $stringToVerify = sprintf('%s:%s', $client['secret_key'], $client['bucket']);
-                //Find by access key bucket and secret key
-                if(password_verify($stringToVerify, $hash)) {
-                    return;
-                }
-
-            } else if (strpos($token, 'GL ') === 0) {
+            if (strpos($token, 'GL ') === 0) {
                 list($accessKey, $signature) = explode(':', trim(str_replace('GL', '', $token)));
                 $index = array_search($accessKey, array_column($clients, 'access_key'));
                 if ($index === false || !isset($clients[$index])) {
