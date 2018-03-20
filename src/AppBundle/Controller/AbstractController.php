@@ -3,7 +3,6 @@
 namespace AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\FormErrorIterator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -22,7 +21,7 @@ abstract class AbstractController extends Controller
      */
     public function success(
         $data = null,
-        $status = JsonResponse::HTTP_OK,
+        int $status = JsonResponse::HTTP_OK,
         array $context = ['groups' => ['list']],
         array $meta = null,
         array $headers = []
@@ -41,7 +40,7 @@ abstract class AbstractController extends Controller
      */
     public function badRequest(
         $errors,
-        $status = JsonResponse::HTTP_BAD_REQUEST,
+        int $status = JsonResponse::HTTP_BAD_REQUEST,
         array $headers = [],
         array $context = []
     ) : JsonResponse
