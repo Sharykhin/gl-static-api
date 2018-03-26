@@ -1,4 +1,8 @@
-version: "2.1"
+version: "3"
+
+networks:
+  ethernet:
+    external: true
 
 services:
   gl-static-api-php:
@@ -7,13 +11,17 @@ services:
     volumes:
       - .:/app
     command: sh /srv/scripts/post-run.sh
+    networks:
+      - ethernet
   gl-static-api-nginx:
     container_name: gl-static-api-nginx
     build: .docker/nginx
-    volumes_from:
-      - gl-static-api-php
+    volumes:
+      - .:/app
     ports:
       - "8003:80"
+    networks:
+      - ethernet
   gl-static-api-varnish:
     container_name: gl-static-api-varnish
     build: .docker/varnish
@@ -23,5 +31,7 @@ services:
       - gl-static-api-nginx
     links:
       - gl-static-api-nginx
+    networks:
+      - ethernet
 
 
